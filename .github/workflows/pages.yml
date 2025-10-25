@@ -1,0 +1,38 @@
+name: Deploy static site to Pages
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract site
+        run: unzip -o 326924db6b9b09ae0e88ac7bced60e80.zip -d site
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site/326924db6b9b09ae0e88ac7bced60e80/public_html
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
